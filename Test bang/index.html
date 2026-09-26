@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BANG! Gestore Torneo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E4CFA6; --panel:#F7EDD8; --panel2:#EEDDBC; --ink:#2A1A12; --muted:#6B5443;
+  --red:#C4161C; --red-dark:#8E0F14; --gold:#9A6C12; --green:#4B6A2F; --line:#C9B084;
+  --focus:#1E5AA8;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1D1510; --panel:#2A1F18; --panel2:#342720; --ink:#F2E5CD; --muted:#BFA78A;
+    --red:#D9342F; --red-dark:#A0201C; --gold:#E0AE4C; --green:#93B368; --line:#4B3A2B;
+    --focus:#7FB2FF;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "Barlow","Segoe UI",system-ui,sans-serif;
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.top{background:var(--red);color:#fff;padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top,0px));
+  display:flex;gap:18px;align-items:center;flex-wrap:wrap;border-bottom:4px solid #2A1A12}
+.brand{font-family:"Rye",Georgia,serif;font-size:clamp(28px,5vw,40px);line-height:1;text-shadow:3px 3px 0 #2A1A12;margin:0}
+.brand span{display:block;font-family:"Barlow Condensed",sans-serif;font-size:16px;font-weight:600;text-shadow:none;margin-top:6px;opacity:.95}
+.steps{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;list-style:none;padding:0;margin-top:0;margin-bottom:0}
+.steps li{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:15px;padding:3px 12px;border:2px solid rgba(255,255,255,.45);border-radius:999px;opacity:.75}
+.steps li.on{background:#fff;color:#C4161C;border-color:#fff;opacity:1}
+.steps li.done{opacity:1;border-color:#fff}
+.stepbtn{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.stepbtn:hover{text-decoration:underline}
+.testbar{background:repeating-linear-gradient(-45deg,#2A1A12 0 12px,#3a271c 12px 24px);color:#F7D774;text-align:center;font-weight:600;padding:6px 12px;font-size:14px}
+
+main{max-width:1240px;margin:0 auto;padding:20px}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--line);margin-bottom:20px;flex-wrap:wrap}
+.tab{background:none;border:0;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--red)}
+
+.panel{background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:18px 20px;margin-bottom:18px}
+.panel.alert{border-color:var(--red);background:color-mix(in srgb,var(--panel) 88%,var(--red))}
+.panel.ok{border-color:var(--green)}
+h2{font-family:"Barlow Condensed",sans-serif;font-size:26px;line-height:1.1;margin:0 0 12px}
+h3{font-family:"Barlow Condensed",sans-serif;font-size:21px;line-height:1.15;margin:0}
+p{margin:0 0 10px;max-width:75ch}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--ink);background:transparent;padding:7px 14px;border-radius:6px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--panel2)}
+.btn.primary{background:var(--red);border-color:var(--red-dark);color:#fff}
+.btn.primary:hover{background:var(--red-dark)}
+.btn.small{padding:3px 9px;font-size:14px;border-width:1.5px}
+.btn.ghost{border-color:var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}
+.spacer{flex:1}
+
+input[type=text],input[type=number],select,textarea{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:7px 10px;min-width:0}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--ink)}
+textarea{width:100%;min-height:90px;resize:vertical}
+label.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
+label.check:last-child{border-bottom:0}
+label.check input{margin-top:5px;width:18px;height:18px;accent-color:var(--red)}
+.field{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.field:last-child{border-bottom:0}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1.5px solid var(--line);border-radius:999px;padding:3px 4px 3px 12px;font-weight:500}
+.chip button{border:0;background:none;cursor:pointer;width:24px;height:24px;border-radius:50%;line-height:1;font-size:17px;color:var(--muted)}
+.chip button:hover{background:var(--red);color:#fff}
+
+.preview{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 14px}
+.preview div{background:var(--panel2);border-radius:6px;padding:10px}
+.preview b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:28px;line-height:1.1}
+.preview span{font-size:14px;color:var(--muted)}
+
+.round-head{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px}
+.round-title{font-family:"Rye",Georgia,serif;font-size:clamp(32px,6vw,52px);line-height:1;margin:0;color:var(--red)}
+.round-title small{font-family:"Barlow Condensed",sans-serif;font-size:22px;color:var(--muted);margin-left:8px}
+
+.tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+@media (max-width:420px){.tables{grid-template-columns:1fr}}
+.tcard{background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.tcard.done{border-color:var(--green)}
+.tcard header{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.badge{font-size:13px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--panel2);color:var(--muted);white-space:nowrap}
+.badge.green{background:var(--green);color:#fff}
+.badge.red{background:var(--red);color:#fff}
+.badge.gold{background:var(--gold);color:#fff}
+.seats{display:flex;flex-direction:column;gap:4px}
+.seat{display:grid;grid-template-columns:26px minmax(0,1fr) 118px 78px;gap:8px;align-items:center}
+.seat.three{grid-template-columns:26px minmax(0,1fr) 118px}
+@media (max-width:480px){.seat{grid-template-columns:20px minmax(0,1fr) 100px 62px}.seat.three{grid-template-columns:20px minmax(0,1fr) 110px}main{padding:14px}.tcard{padding:12px}}
+.seat .pos{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:18px;text-align:center;color:var(--muted)}
+.seat.sheriff .pos{color:var(--gold)}
+.seat .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.seat select,.seat input{width:100%;padding:4px 6px;font-size:15px}
+.seat .gain{font-family:"Barlow Condensed",sans-serif;font-weight:600;text-align:right}
+.seat-head{font-size:13px;color:var(--muted)}
+.tag{font-size:12px;font-weight:600;color:var(--red);margin-left:6px}
+.decks{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px;background:var(--panel2);border-radius:6px;padding:6px 10px}
+.decks input{width:18px;height:18px;accent-color:var(--red)}
+.noon{font-weight:600;color:var(--red)}
+.seg{display:flex;border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+.seg label{flex:1;text-align:center;padding:6px 4px;cursor:pointer;font-weight:600;font-size:15px;border-right:1.5px solid var(--ink)}
+.seg label:last-child{border-right:0}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--ink);color:var(--panel)}
+.seg label:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:-3px}
+.err{color:var(--red);font-size:14px;font-weight:600}
+.linkbtn{background:none;border:0;padding:0;font:inherit;font-weight:600;color:inherit;text-decoration:underline;cursor:pointer}
+.warnline{color:var(--gold);font-size:14px;font-weight:600}
+
+table.list{width:100%;border-collapse:collapse}
+.scroll{overflow-x:auto}
+table.list th,table.list td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.list th{font-size:14px;color:var(--muted);font-weight:600}
+table.list td.num,table.list th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.list tr.top4 td{background:color-mix(in srgb,var(--panel) 85%,var(--gold))}
+.pos-big{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:20px}
+
+.secret{display:flex;flex-direction:column;align-items:center;gap:10px;padding:34px 10px;text-align:center}
+
+.bracket{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:18px;overflow-x:auto;padding-bottom:6px}
+.bcol{display:flex;flex-direction:column;gap:14px;justify-content:space-around}
+.bcol > h3{margin-bottom:2px}
+.match{background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:12px}
+.match.done{border-color:var(--green)}
+.mp{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.mp:last-of-type{border-bottom:0}
+.mp .seed{font-family:"Barlow Condensed",sans-serif;font-weight:700;color:var(--muted);width:28px}
+.mp .who{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.mp.win .who{color:var(--green)}
+.mp.lose .who{color:var(--muted);text-decoration:line-through}
+
+#modal:empty,#dialog:empty{display:none}
+#dialog .overlay{z-index:80}
+.dbox{background:var(--panel);border:2px solid var(--ink);border-radius:10px;padding:20px;width:min(460px,100%)}
+.dbox p{margin:0 0 16px;font-size:17px}
+.overlay{position:fixed;inset:0;background:rgba(20,12,8,.75);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.clock{background:var(--panel);border-radius:10px;width:min(760px,100%);padding:16px;display:flex;flex-direction:column;gap:12px}
+.clock-sides{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cside{border:3px solid var(--line);border-radius:10px;padding:22px 10px;text-align:center;cursor:pointer;background:var(--panel2)}
+.cside.run{border-color:var(--red);background:var(--red);color:#fff}
+.cside.out{border-color:var(--ink);background:var(--ink);color:var(--panel)}
+.cside .t{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:clamp(44px,11vw,84px);line-height:1;font-variant-numeric:tabular-nums}
+.cside .n{font-weight:600;font-size:18px;margin-bottom:8px}
+.cside .r{font-size:14px;opacity:.85}
+
+#print{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  body > *:not(#print){display:none !important}
+  #print{display:block}
+  .sheet{page-break-inside:avoid;border:1.5px solid #000;padding:12px 16px;margin-bottom:14px;font-family:Barlow,sans-serif}
+  .sheet h4{margin:0 0 6px;font-size:18px}
+  .sheet table{width:100%;border-collapse:collapse;font-size:14px}
+  .sheet th,.sheet td{border:1px solid #000;padding:5px 6px;text-align:left}
+  .sheet .box{display:inline-block;width:14px;height:14px;border:1.5px solid #000;vertical-align:middle;margin:0 4px 0 10px}
+  .sheet p{margin:6px 0;font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 class="brand">BANG!<span>Gestore torneo, regolamento Campionato 2025–26</span></h1>
+  <ol class="steps" id="steps"></ol>
+</header>
+<div id="testbar"></div>
+<main id="app"></main>
+<div id="modal"></div>
+<div id="dialog"></div>
+<div id="print"></div>
+<input type="file" id="importFile" accept="application/json" hidden>
+
+<script>
+"use strict";
+/* ===================== Costanti di regolamento ===================== */
+const KEY = "bangTM.v1";
+const ROLE = {S:"Sceriffo", V:"Vice", R:"Rinnegato", F:"Fuorilegge"};
+const ROLE_COUNTS = {5:{S:1,V:1,R:1,F:2}, 6:{S:1,V:1,R:1,F:3}, 7:{S:1,V:2,R:1,F:3}};
+const PAY = {
+  legge:  {5:1200, 6:1600, 7:1200},
+  renLast:{5:300,  6:350,  7:400},
+  fuori:  {5:1800, 6:1500, 7:1700},
+  rinn:   {5:2400, 6:2600, 7:2800}
+};
+const WIN_LABEL = {legge:"Vince la Legge", fuorilegge:"Vincono i Fuorilegge", rinnegato:"Vince il Rinnegato"};
+const TEST_NAMES = ["Calamity Carla","Doc Marco","Lucky Luca","Rosa Doolan","Willy Gianni","Paolo Regret","Kit Chiara","Jesse Giorgio",
+  "Black Jack Anna","Suzy Elisa","Sid Matteo","Slab Davide","Vulture Sara","Pedro Nicola","El Gringo Fabio","Bart Laura",
+  "Jourdonnais Ivo","Belle Marta","Apache Enzo","Tequila Rita"];
+
+/* Tabella dei tavoli (1.1). Oltre 50 iscritti: tavoli da 5-6. */
+function tableSizes(n){
+  const fill=(t,sixes)=>Array.from({length:t},(_,i)=>i<sixes?6:5);
+  if(n<10) return null;
+  if(n<=12) return fill(2,n-10);
+  if(n===13) return [7,6];
+  if(n===14) return [7,7];
+  if(n<=18) return fill(3,n-15);
+  if(n===19) return [6,6,7];
+  if(n<=24) return fill(4,n-20);
+  if(n<=30) return fill(5,n-25);
+  if(n<=36) return fill(6,n-30);
+  if(n<=39) return fill(7,n-35);
+  if(n<=48) return fill(8,n-40);
+  if(n===49) return [6,6,6,6,5,5,5,5,5];
+  if(n===50) return fill(10,0);
+  const t=Math.ceil(n/6); return fill(t,n-5*t);
+}
+function turnsFor(n){ return n<15?3:(n<25?4:5); }
+function noonStarter(k){ return k===6?1:0; } // indice di seduta di chi inizia il Mezzogiorno di fuoco
+
+/* ===================== Stato ===================== */
+function fresh(){
+  return {name:"", test:false, phase:"setup",
+    settings:{duel:true, top8:false, auction:true, turnsOverride:0, noonMin:0, duelMin:30, duelChars:"4/6"},
+    players:[], totalTurns:0, startMoney:0, initialCount:0, rounds:[],
+    duels:{qual:[], results:{}, legge:{}, thirdNotPlayed:false}};
+}
+function load(){ try{const r=localStorage.getItem(KEY); return r?JSON.parse(r):null;}catch(e){return null;} }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} }
+let S = load() || fresh();
+let UI = {tab:null, showRank:false, balance:"", editing:{}, open:{}};
+let CLK = null, clkTimer = null;
+
+/* ===================== Finestre di dialogo (sostituiscono confirm/alert/prompt, bloccati in alcuni contesti) ===================== */
+function dialog(msg,buttons){
+  return new Promise(res=>{
+    const host=document.getElementById("dialog");
+    host.innerHTML=`<div class="overlay" role="alertdialog" aria-modal="true"><div class="dbox"><p>${esc(msg)}</p>
+      <div class="row end">${buttons.map((b,i)=>`<button class="btn ${b.primary?"primary":"ghost"}" data-dlg="${i}">${esc(b.label)}</button>`).join("")}</div></div></div>`;
+    const done=i=>{host.innerHTML="";host.onclick=null;document.removeEventListener("keydown",key,true);res(i);};
+    const key=e=>{ if(e.key==="Escape"){e.stopPropagation();done(0);} };
+    document.addEventListener("keydown",key,true);
+    host.onclick=e=>{const b=e.target.closest("[data-dlg]"); if(b) done(+b.dataset.dlg);};
+    (host.querySelector(".btn.primary")||host.querySelector(".btn")).focus();
+  });
+}
+const ask=(msg,ok="Conferma")=>dialog(msg,[{label:"Annulla"},{label:ok,primary:true}]).then(i=>i===1);
+const notice=msg=>dialog(msg,[{label:"OK",primary:true}]);
+
+/* ===================== Utilità ===================== */
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = n => (n<0?"−":"") + Math.abs(n).toLocaleString("it-IT") + " $";
+const uid = () => Math.random().toString(36).slice(2,9);
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+const P = id => S.players.find(p=>p.id===id);
+const nameOf = id => P(id)?P(id).name:"?";
+const active = () => S.players.filter(p=>p.status==="active");
+const curRound = () => S.rounds[S.rounds.length-1];
+const hasDuelTop8 = () => S.settings.top8 && S.initialCount>18;
+
+/* ===================== Punteggi ===================== */
+function gainOf(t,pid){
+  if(!t.done) return 0;
+  const k=t.seats.length, r=t.roles[pid];
+  if(!PAY.legge[k]) return 0;
+  if(t.winner==="legge"){ if(r==="S"||r==="V") return PAY.legge[k]; if(r==="R"&&t.renLast) return PAY.renLast[k]; }
+  if(t.winner==="fuorilegge"&&r==="F") return PAY.fuori[k];
+  if(t.winner==="rinnegato"&&r==="R") return PAY.rinn[k];
+  return 0;
+}
+function isWin(t,pid){
+  const r=t.roles[pid];
+  return (t.winner==="legge"&&(r==="S"||r==="V"))||(t.winner==="fuorilegge"&&r==="F")||(t.winner==="rinnegato"&&r==="R");
+}
+const spendOf = (t,pid) => S.settings.auction ? (parseInt(t.spend[pid])||0) : 0;
+
+function stats(){
+  const st={};
+  S.players.forEach(p=>st[p.id]={gain:0,spend:0,wins:0,games:0,opps:[],sheriff:0,last:0});
+  S.rounds.forEach(r=>r.tables.forEach(t=>t.seats.forEach((pid,si)=>{
+    const s=st[pid]; if(!s) return;
+    if(si===0) s.sheriff++;
+    if(si===t.seats.length-1) s.last++;
+    if(!t.done) return;
+    s.games++; s.gain+=gainOf(t,pid); s.spend+=spendOf(t,pid);
+    if(isWin(t,pid)) s.wins++;
+    t.seats.forEach(o=>{ if(o!==pid) s.opps.push(o); });
+  })));
+  S.players.forEach(p=>{ const s=st[p.id]; s.score=S.startMoney+s.gain-s.spend; });
+  S.players.forEach(p=>{ const o=st[p.id].opps; st[p.id].marogi=o.length?o.reduce((a,x)=>a+st[x].score,0)/o.length:0; });
+  return st;
+}
+/* Saldo disponibile all'asta del turno ri (esclusi i risultati del turno stesso) */
+function availableAt(pid,ri){
+  let v=S.startMoney;
+  S.rounds.slice(0,ri).forEach(r=>r.tables.forEach(t=>{ if(t.done&&t.seats.includes(pid)) v+=gainOf(t,pid)-spendOf(t,pid); }));
+  return v;
+}
+/* Classifica fase a punteggio con spareggio "sistema Marogi" → vittorie → sorteggio */
+function ranking(){
+  const st=stats();
+  return S.players.slice().sort((a,b)=>{
+    const A=st[a.id],B=st[b.id];
+    return (B.score-A.score)||(B.marogi-A.marogi)||(B.wins-A.wins)||((b.lot||0)-(a.lot||0));
+  }).map(p=>({p,s:st[p.id]}));
+}
+function bonusFor(pos){
+  const t=S.totalTurns;
+  if(pos>4) return 0;
+  if(!S.settings.duel) return 25*t;
+  return [200,100,50,25][pos-1]*t;
+}
+
+function pendingEdits(){
+  const out=[];
+  S.rounds.forEach((r,ri)=>{
+    if(S.phase==="rounds"&&ri===S.rounds.length-1) return;
+    r.tables.forEach(t=>{ if(!t.done) out.push({r,t}); });
+  });
+  return out;
+}
+function pendingPanel(){
+  const pe=pendingEdits(); if(!pe.length) return "";
+  return `<div class="panel alert"><p style="margin:0">In modifica: ${pe.map(x=>"turno "+x.r.n+", tavolo "+x.t.n).join("; ")}. Conferma di nuovo il risultato dalla scheda <button class="linkbtn" data-a="tab" data-v="storico">Storico turni</button>: finché resta in modifica quella partita non conta nel punteggio.</p></div>`;
+}
+function newQual(){ return ranking().slice(0,S.duels.qual.length).map(x=>x.p.id); }
+function qualDrift(){
+  if(!S.settings.duel||S.phase==="rounds"||S.phase==="setup"||!S.duels.qual.length) return false;
+  return newQual().join()!==S.duels.qual.join();
+}
+function driftPanel(){
+  if(!qualDrift()) return "";
+  return `<div class="panel alert"><div class="row"><p style="margin:0;flex:1">Dopo la correzione i qualificati ai duelli (o il loro ordine) sono cambiati. Nuovi qualificati: ${newQual().map((id,i)=>(i+1)+"° "+esc(nameOf(id))).join(", ")}.</p>
+    <button class="btn primary" data-a="requal">Aggiorna il tabellone</button></div></div>`;
+}
+
+/* ===================== Formazione tavoli ===================== */
+function newTable(i,seats){
+  return {id:uid(), n:i+1, seats, roles:{[seats[0]]:"S"}, spend:{}, winner:null, renLast:false, decks:[false,false,false], done:false};
+}
+function buildRound(idx){
+  const sher=new Set(), lastC={};
+  S.rounds.slice(0,idx).forEach(r=>r.tables.forEach(t=>{ sher.add(t.seats[0]); const l=t.seats[t.seats.length-1]; lastC[l]=(lastC[l]||0)+1; }));
+  const act=active().map(p=>p.id);
+  const sizes=tableSizes(act.length);
+  if(!sizes) return null;
+  const T=sizes.length; let warn="";
+  let elig=shuffle(act.filter(id=>!sher.has(id)));
+  if(elig.length<T){
+    warn="Non ci sono abbastanza giocatori che non sono ancora stati Sceriffo: alcuni lo saranno per la seconda volta.";
+    elig=elig.concat(shuffle(act.filter(id=>sher.has(id))));
+  }
+  const sheriffs=elig.slice(0,T);
+  const rest=shuffle(act.filter(id=>!sheriffs.includes(id)));
+  const lastPick=rest.filter(id=>!lastC[id]).concat(rest.filter(id=>lastC[id])).slice(0,T);
+  const middle=shuffle(rest.filter(id=>!lastPick.includes(id)));
+  let mi=0;
+  const tables=sizes.map((k,i)=>{
+    const seats=[sheriffs[i]];
+    for(let j=0;j<k-2;j++) seats.push(middle[mi++]);
+    seats.push(lastPick[i]);
+    return newTable(i,seats);
+  });
+  return {n:idx+1, tables, warn, noonStart:null};
+}
+
+/* ===================== Validazione tavolo ===================== */
+function tableErrors(t){
+  const k=t.seats.length, need=ROLE_COUNTS[k];
+  if(!need) return "Tavolo da "+k+" giocatori non previsto dal regolamento.";
+  if(t.seats.some(pid=>!t.roles[pid])) return "Indica il ruolo di tutti i giocatori.";
+  const c={S:0,V:0,R:0,F:0}; t.seats.forEach(pid=>c[t.roles[pid]]++);
+  for(const r of ["S","V","R","F"]) if(c[r]!==need[r])
+    return "Ruoli non validi: con "+k+" giocatori servono "+need.V+" Vice, "+need.R+" Rinnegato e "+need.F+" Fuorilegge.";
+  if(S.settings.auction){
+    for(const pid of t.seats){ const v=parseInt(t.spend[pid]); if(!(v>=10)||v%10!==0) return "Ogni personaggio costa almeno 10 $, in multipli di 10 ("+nameOf(pid)+")."; }
+  }
+  if(!t.winner) return "Indica chi ha vinto la partita.";
+  return "";
+}
+
+/* ===================== Render ===================== */
+const PHASES=[["setup","Iscrizioni"],["rounds","Fase a punteggio"],["duels","Fase a duello"],["done","Classifica finale"]];
+function tabsFor(){
+  if(S.phase==="setup") return [["iscrizioni","Iscrizioni"],["dati","Dati"]];
+  const t=[];
+  if(S.phase==="rounds") t.push(["turno","Turno in corso"]);
+  if(S.phase==="duels") t.push(["duelli","Duelli"]);
+  t.push(["classifica",S.phase==="done"?"Classifica finale":"Classifica"]);
+  if(S.phase==="done"&&S.settings.duel) t.push(["duelli","Duelli"]);
+  t.push(["giocatori","Giocatori"],["storico","Storico turni"],["dati","Dati"]);
+  return t;
+}
+function render(){
+  const ph=PHASES.filter(p=>p[0]!=="duels"||S.settings.duel);
+  const ci=ph.findIndex(p=>p[0]===S.phase);
+  const target={setup:S.phase==="setup"?"iscrizioni":null, rounds:S.phase==="rounds"?"turno":(S.phase!=="setup"?"storico":null),
+    duels:(S.phase==="duels"||S.phase==="done")?"duelli":null, done:S.phase==="done"?"classifica":null};
+  document.getElementById("steps").innerHTML=ph.map((p,i)=>`<li class="${i===ci?"on":i<ci?"done":""}">${target[p[0]]?`<button class="stepbtn" data-a="tab" data-v="${target[p[0]]}">${p[1]}</button>`:p[1]}</li>`).join("");
+  document.getElementById("testbar").innerHTML=S.test?`<div class="testbar">Modalità test attiva: partecipanti di prova e risultati simulabili</div>`:"";
+  const tabs=tabsFor();
+  if(!tabs.some(t=>t[0]===UI.tab)) UI.tab=tabs[0][0];
+  let html=`<nav class="tabs" role="tablist">${tabs.map(t=>`<button class="tab ${t[0]===UI.tab?"on":""}" role="tab" aria-selected="${t[0]===UI.tab}" data-a="tab" data-v="${t[0]}">${t[1]}</button>`).join("")}</nav>`;
+  html+=({iscrizioni:vSetup,turno:vRound,classifica:vRanking,giocatori:vPlayers,storico:vHistory,duelli:vDuels,dati:vData}[UI.tab])();
+  document.getElementById("app").innerHTML=html;
+  save();
+}
+
+/* ---------- Iscrizioni ---------- */
+function vSetup(){
+  const n=S.players.length, st=S.settings;
+  const turns=st.turnsOverride||turnsFor(n);
+  const sizes=tableSizes(n);
+  const opt=(v,cur,l)=>`<option value="${v}" ${String(v)===String(cur)?"selected":""}>${l}</option>`;
+  return `<div class="cols">
+  <div>
+    <section class="panel">
+      <h2>Torneo</h2>
+      <div class="row"><input type="text" style="flex:1" placeholder="Nome del torneo (es. Torneo di Bari, ottobre)" value="${esc(S.name)}" data-c="tname" aria-label="Nome del torneo"></div>
+    </section>
+    <section class="panel">
+      <h2>Partecipanti (${n})</h2>
+      <form class="row" data-f="add">
+        <input type="text" id="pname" style="flex:1" placeholder="Nome e cognome" aria-label="Nome partecipante" autocomplete="off">
+        <button class="btn primary" type="submit">Aggiungi</button>
+      </form>
+      <details style="margin-top:12px"><summary class="muted">Incolla un elenco di nomi</summary>
+        <textarea id="pbulk" placeholder="Un nome per riga" style="margin-top:8px"></textarea>
+        <div class="row" style="margin-top:8px"><button class="btn" data-a="bulk">Aggiungi elenco</button></div>
+      </details>
+      ${n?`<div class="chips">${S.players.map(p=>`<span class="chip">${esc(p.name)}<button data-a="delp" data-id="${p.id}" aria-label="Rimuovi ${esc(p.name)}">×</button></span>`).join("")}</div>`:
+        `<p class="muted" style="margin-top:12px">Nessun iscritto. Aggiungi i partecipanti uno alla volta, incolla un elenco o carica i 20 partecipanti di prova.</p>`}
+      <div class="row" style="margin-top:14px">
+        <button class="btn" data-a="loadtest">Carica 20 partecipanti di prova</button>
+        ${n?`<button class="btn ghost" data-a="clearp">Svuota elenco</button>`:""}
+      </div>
+    </section>
+  </div>
+  <div>
+    <section class="panel">
+      <h2>Impostazioni</h2>
+      <label class="check"><input type="checkbox" data-c="set" data-k="duel" ${st.duel?"checked":""}><span>Fase a duello con BANG! The Duel<br><span class="small muted">Senza, la classifica dopo i turni è definitiva.</span></span></label>
+      <label class="check"><input type="checkbox" data-c="set" data-k="top8" ${st.top8?"checked":""} ${st.duel?"":"disabled"}><span>Primi 8 alla fase a duello<br><span class="small muted">Deroga ammessa solo con più di 18 iscritti.</span></span></label>
+      <label class="check"><input type="checkbox" data-c="set" data-k="auction" ${st.auction?"checked":""}><span>Asta dei personaggi<br><span class="small muted">Se disattivata, ognuno sceglie tra due personaggi a caso.</span></span></label>
+      <div class="field"><span>Numero di turni<br><span class="small muted">Diverso dallo standard: serve l'approvazione dell'editore.</span></span>
+        <select data-c="set" data-k="turnsOverride">${opt(0,st.turnsOverride,"Da regolamento")}${[2,3,4,5].map(v=>opt(v,st.turnsOverride,v+" turni")).join("")}</select></div>
+      <div class="field"><span>Mezzogiorno di fuoco a tempo<br><span class="small muted">Deroga con approvazione dell'editore; minimo 30 minuti.</span></span>
+        <select data-c="set" data-k="noonMin">${opt(0,st.noonMin,"No")}${[30,40,45,60].map(v=>opt(v,st.noonMin,v+" min")).join("")}</select></div>
+      <div class="field"><span>Orologio dei duelli</span>
+        <select data-c="set" data-k="duelMin">${opt(30,st.duelMin,"30 min a testa")}${opt(25,st.duelMin,"25 min (deroga)")}${opt(0,st.duelMin,"Senza timer")}</select></div>
+      <div class="field"><span>Personaggi a duello</span>
+        <select data-c="set" data-k="duelChars">${opt("4/6",st.duelChars,"4 su 6")}${opt("3/5",st.duelChars,"3 su 5")}</select></div>
+    </section>
+    <section class="panel ${n>=10?"ok":""}">
+      <h2>Anteprima</h2>
+      ${n<10?`<p>Servono almeno 10 partecipanti per avviare il torneo. Ne mancano ${10-n}.</p>`:`
+      <div class="preview">
+        <div><b>${turns}</b><span>turni</span></div>
+        <div><b>${sizes.length}</b><span>tavoli per turno</span></div>
+        <div><b>${turns*100} $</b><span>a testa all'inizio</span></div>
+      </div>
+      <p class="small muted">Composizione tavoli: ${sizes.join(", ")} giocatori.${st.top8&&st.duel&&n<=18?" I primi 8 ai duelli richiedono più di 18 iscritti: ne andranno 4.":""}</p>`}
+      <div class="row end"><button class="btn primary" data-a="start" ${n<10?"disabled":""}>Avvia torneo e sorteggia il turno 1</button></div>
+    </section>
+  </div></div>`;
+}
+
+/* ---------- Turno ---------- */
+function vRound(){
+  const r=curRound(); if(!r) return "";
+  const ri=S.rounds.length-1;
+  const allDone=r.tables.every(t=>t.done);
+  const anyDone=r.tables.some(t=>t.done);
+  const last=S.rounds.length>=S.totalTurns;
+  const act=active().length;
+  let noon="";
+  if(S.settings.noonMin){
+    noon=r.noonStart?`<span class="badge red" id="noonClock">…</span> <button class="btn small ghost" data-a="noonstop">Azzera timer</button>`
+      :`<button class="btn small" data-a="noonstart">Avvia timer del turno (${S.settings.noonMin} min)</button>`;
+  }
+  const retiredHere=r.tables.flatMap(t=>t.seats).filter(id=>P(id).status!=="active");
+  return `
+  <div class="round-head">
+    <h2 class="round-title">Turno ${r.n}<small>di ${S.totalTurns}</small></h2>
+    <span class="spacer"></span>
+    <div class="row">
+      ${noon}
+      <button class="btn" data-a="print">Stampa schede di gioco</button>
+      ${!anyDone?`<button class="btn ghost" data-a="regen">Sorteggia di nuovo</button>`:""}
+      ${S.test&&!allDone?`<button class="btn" data-a="simround">Simula risultati</button>`:""}
+    </div>
+  </div>
+  ${pendingPanel()}
+  ${r.warn?`<div class="panel alert"><p>${esc(r.warn)}</p></div>`:""}
+  ${retiredHere.length&&!anyDone?`<div class="panel alert"><p>${retiredHere.map(nameOf).map(esc).join(", ")} ${retiredHere.length>1?"si sono ritirati":"si è ritirato"}. Se la partita non è ancora iniziata puoi sorteggiare di nuovo i tavoli; altrimenti il personaggio resta in gioco in modo passivo.</p></div>`:""}
+  <p class="muted small">Il giocatore in posizione 1 è lo Sceriffo; gli altri si siedono alla sua sinistra nell'ordine indicato. ${S.settings.auction?"Il saldo mostrato accanto a ogni nome è quello disponibile per l'asta: comunicalo solo al diretto interessato.":"Asta disattivata: ognuno sceglie tra due personaggi a caso."}</p>
+  <div class="tables">${r.tables.map(t=>vTable(t,ri)).join("")}</div>
+  <div class="panel ${allDone?"ok":""}" style="margin-top:18px">
+    <div class="row">
+      <p style="margin:0">${allDone?(last?"Tutti i risultati sono registrati. Chiudendo la fase a punteggio la classifica diventa pubblica.":"Tutti i risultati sono registrati."):`Risultati registrati: ${r.tables.filter(t=>t.done).length} di ${r.tables.length}.`}
+      ${!last&&allDone&&act<10?`<br><span class="err">Restano ${act} giocatori attivi: con meno di 10 il torneo non può proseguire né essere omologato.</span>`:""}</p>
+      <span class="spacer"></span>
+      <button class="btn primary" data-a="closeround" ${allDone&&(last||act>=10)&&!pendingEdits().length?"":"disabled"}>${last?"Chiudi la fase a punteggio":"Chiudi il turno e sorteggia il turno "+(r.n+1)}</button>
+    </div>
+  </div>`;
+}
+function vTable(t,ri){
+  const k=t.seats.length, ed=!t.done, auc=S.settings.auction;
+  const err=ed?tableErrors(t):"";
+  const decksDone=t.decks.filter(Boolean).length;
+  const starter=nameOf(t.seats[noonStarter(k)]);
+  const roleSel=(pid,si)=>si===0?`<select disabled aria-label="Ruolo"><option>Sceriffo</option></select>`:
+    `<select data-c="role" data-t="${t.id}" data-p="${pid}" ${ed?"":"disabled"} aria-label="Ruolo di ${esc(nameOf(pid))}">
+      <option value="">Ruolo…</option>${["V","R","F"].map(r=>`<option value="${r}" ${t.roles[pid]===r?"selected":""}>${ROLE[r]}</option>`).join("")}</select>`;
+  const seats=t.seats.map((pid,si)=>{
+    const p=P(pid), av=availableAt(pid,ri), sp=parseInt(t.spend[pid])||0;
+    const over=auc&&sp>av;
+    return `<div class="seat ${si===0?"sheriff":""} ${ed&&!auc?"three":""}">
+      <span class="pos">${si+1}</span>
+      <span class="nm" title="${esc(p.name)}">${esc(p.name)}${p.status!=="active"?`<span class="tag">${p.status==="expelled"?"espulso":"ritirato"}</span>`:""}${auc&&ed?`<br><span class="small muted">saldo ${money(av)}</span>`:""}${over?`<br><span class="small err">oltre il saldo</span>`:""}</span>
+      ${roleSel(pid,si)}
+      ${ed?(auc?`<input type="number" min="10" step="10" inputmode="numeric" placeholder="$ asta" value="${t.spend[pid]??""}" data-c="spend" data-t="${t.id}" data-p="${pid}" aria-label="Spesa all'asta di ${esc(p.name)}">`:"")
+        :`<span class="gain">${gainOf(t,pid)?"+"+money(gainOf(t,pid)):"0 $"}${auc?`<br><span class="small muted">asta −${sp}</span>`:""}</span>`}
+    </div>`;
+  }).join("");
+  const w=(v,l)=>`<label><input type="radio" name="w_${t.id}" value="${v}" data-c="winner" data-t="${t.id}" ${t.winner===v?"checked":""} ${ed?"":"disabled"}>${l}</label>`;
+  return `<article class="tcard ${t.done?"done":""}">
+    <header><h3>Tavolo ${t.n}</h3><span class="badge ${t.done?"green":""}">${t.done?WIN_LABEL[t.winner]:k+" giocatori"}</span></header>
+    <div class="seats">
+      <div class="seat seat-head ${ed&&!auc?"three":""}"><span>#</span><span>Giocatore</span><span>Ruolo</span>${ed&&!auc?"":`<span>${ed?"Asta":"Vinti"}</span>`}</div>
+      ${seats}
+    </div>
+    <div class="decks">
+      <span>Smazzate</span>
+      ${t.decks.map((d,i)=>`<label><input type="checkbox" data-c="deck" data-t="${t.id}" data-i="${i}" ${d?"checked":""} ${ed?"":"disabled"} aria-label="Smazzata ${i+1}"></label>`).join("")}
+      <span class="${decksDone===3?"noon":"muted"}">${decksDone===3?"Mezzogiorno di fuoco: si perde 1 vita a inizio turno, a partire da "+esc(starter):"Mezzogiorno dalla 4ª smazzata, inizia "+esc(starter)}</span>
+    </div>
+    ${ed?`<div class="seg" role="radiogroup" aria-label="Esito">${w("legge","Legge")}${w("fuorilegge","Fuorilegge")}${w("rinnegato","Rinnegato")}</div>
+      ${t.winner==="legge"?`<label class="check" style="padding:2px 0;border:0"><input type="checkbox" data-c="renlast" data-t="${t.id}" ${t.renLast?"checked":""}><span class="small">Il Rinnegato è arrivato al duello finale ed è stato eliminato dallo Sceriffo</span></label>`:""}
+      <div class="row">${err?`<span class="err" style="flex:1">${esc(err)}</span>`:`<span class="spacer"></span>`}<button class="btn primary small" data-a="confirm" data-t="${t.id}" ${err?"disabled":""}>Conferma risultato</button></div>`
+    :`<div class="row"><span class="small muted" style="flex:1">${t.winner==="legge"&&t.renLast?"Rinnegato eliminato per ultimo dallo Sceriffo.":""}</span><button class="btn small ghost" data-a="edit" data-t="${t.id}">Modifica</button></div>`}
+  </article>`;
+}
+
+/* ---------- Classifica ---------- */
+function vRanking(){
+  const secret=S.phase==="rounds";
+  if(secret&&!UI.showRank){
+    return `<section class="panel"><div class="secret">
+      <h2>La classifica è riservata all'arbitro</h2>
+      <p class="muted">Durante la fase a punteggio i $ di ogni giocatore restano segreti. Ciascuno può conoscere solo il proprio saldo, dalla scheda Giocatori.</p>
+      <button class="btn primary" data-a="showrank">Mostra la classifica</button></div></section>`;
+  }
+  const final=S.phase==="done";
+  const rows=final?finalStandings():ranking().map((x,i)=>({pos:i+1,p:x.p,s:x.s,bonus:0}));
+  const nq=S.settings.duel?(hasDuelTop8()?8:4):4;
+  return `${pendingPanel()}${driftPanel()}<section class="panel">
+    <div class="row" style="margin-bottom:10px"><h2 style="margin:0">${final?"Classifica finale":S.phase==="duels"?"Classifica della fase a punteggio":"Classifica provvisoria"}</h2><span class="spacer"></span>
+      ${secret?`<button class="btn small ghost" data-a="hiderank">Nascondi</button>`:""}
+      <button class="btn small" data-a="csv">Esporta CSV</button></div>
+    ${final&&S.settings.duel?`<p class="small muted">Le prime ${hasDuelTop8()?8:4} posizioni sono decise dai duelli, indipendentemente dai $ della fase a punteggio.</p>`:""}
+    ${S.phase==="duels"?`<p class="small muted">Evidenziati i ${nq} qualificati alla fase a duello.</p>`:""}
+    <div class="scroll"><table class="list">
+      <thead><tr><th>Pos.</th><th>Giocatore</th><th class="num">Punteggio</th>${final?`<th class="num">Bonus</th><th class="num">Totale</th>`:""}<th class="num">Marogi</th><th class="num">Vittorie</th><th class="num">Partite</th><th>Stato</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr class="${(final?r.pos<=4:(S.phase==="duels"?r.pos<=nq:false))?"top4":""}">
+        <td class="pos-big">${r.pos}</td><td>${esc(r.p.name)}</td>
+        <td class="num">${money(r.s.score)}</td>
+        ${final?`<td class="num">${r.bonus?"+"+money(r.bonus):"—"}</td><td class="num"><b>${money(r.s.score+r.bonus)}</b></td>`:""}
+        <td class="num">${r.s.marogi.toLocaleString("it-IT",{maximumFractionDigits:1})}</td>
+        <td class="num">${r.s.wins}</td><td class="num">${r.s.games}</td>
+        <td>${r.p.status==="active"?"":r.p.status==="expelled"?"Espulso":"Ritirato"}</td></tr>`).join("")}</tbody>
+    </table></div>
+    <p class="small muted" style="margin-top:10px">Spareggio: sistema Marogi (media dei punteggi degli avversari incontrati), poi numero di vittorie, poi sorteggio.</p>
+  </section>`;
+}
+function finalStandings(){
+  const base=ranking();
+  const byId=Object.fromEntries(base.map((x,i)=>[x.p.id,{...x,base:i}]));
+  let order=[];
+  if(S.settings.duel&&S.duels.qual.length){
+    const res=S.duels.results;
+    const [f1,f2]=matchPlayers("F"); const fw=res.F?.winner;
+    order.push(fw, fw===f1?f2:f1);
+    const [t1,t2]=matchPlayers("P3");
+    if(!S.duels.thirdNotPlayed&&res.P3){ const tw=res.P3.winner; order.push(tw,tw===t1?t2:t1); }
+    else order.push(...[t1,t2].sort((a,b)=>byId[a].base-byId[b].base));
+    if(S.duels.qual.length===8){
+      const ql=["QF1","QF2","QF3","QF4"].map(id=>{const [a,b]=matchPlayers(id); return res[id].winner===a?b:a;});
+      order.push(...ql.sort((a,b)=>byId[a].base-byId[b].base));
+    }
+  }
+  const set=new Set(order);
+  base.forEach(x=>{ if(!set.has(x.p.id)) order.push(x.p.id); });
+  return order.map((id,i)=>({pos:i+1,p:byId[id].p,s:byId[id].s,bonus:bonusFor(i+1)}));
+}
+
+/* ---------- Giocatori ---------- */
+function vPlayers(){
+  const st=stats(), ri=S.rounds.length-1;
+  const inRound=S.phase==="rounds";
+  const bal=UI.balance&&P(UI.balance)?(()=>{
+    const s=st[UI.balance];
+    return `<p style="margin-top:10px"><b>${esc(nameOf(UI.balance))}</b>: punteggio attuale ${money(s.score)}${inRound&&S.settings.auction?`, disponibile per l'asta del turno ${ri+1}: ${money(availableAt(UI.balance,ri))}`:""}.</p>`;
+  })():"";
+  return `<section class="panel">
+    <h2>Saldo di un giocatore</h2>
+    <p class="small muted">Ogni giocatore può conoscere solo il proprio totale.</p>
+    <select data-c="balance" aria-label="Scegli giocatore"><option value="">Scegli un giocatore…</option>${S.players.map(p=>`<option value="${p.id}" ${UI.balance===p.id?"selected":""}>${esc(p.name)}</option>`).join("")}</select>
+    ${bal}
+  </section>
+  <section class="panel">
+    <h2>Giocatori (${active().length} attivi su ${S.players.length})</h2>
+    <p class="small muted">Chi si ritira o viene espulso finisce la partita in corso in modo passivo e non partecipa ai turni successivi. Alla seconda ammonizione l'espulsione è automatica.</p>
+    <div class="scroll"><table class="list">
+      <thead><tr><th>Giocatore</th><th>Stato</th><th class="num">Sceriffo</th><th class="num">Ultimo posto</th><th class="num">Ammonizioni</th><th></th></tr></thead>
+      <tbody>${S.players.map(p=>{const s=st[p.id]; return `<tr>
+        <td>${esc(p.name)}</td>
+        <td>${p.status==="active"?"In gara":p.status==="expelled"?"Espulso":"Ritirato"}</td>
+        <td class="num">${s.sheriff?"Sì":"—"}</td><td class="num">${s.last||"—"}</td><td class="num">${p.warnings||0}</td>
+        <td><div class="row end">${p.status==="active"&&S.phase!=="done"?`
+          <button class="btn small ghost" data-a="warn" data-id="${p.id}">Ammonisci</button>
+          <button class="btn small ghost" data-a="retire" data-id="${p.id}">Ritira</button>
+          <button class="btn small ghost" data-a="expel" data-id="${p.id}">Espelli</button>`:""}</div></td></tr>`;}).join("")}</tbody>
+    </table></div>
+  </section>`;
+}
+
+/* ---------- Storico ---------- */
+function vHistory(){
+  if(!S.rounds.length) return `<section class="panel"><p>Nessun turno giocato.</p></section>`;
+  return `${pendingPanel()}${driftPanel()}
+  <p class="muted small">Apri un turno e premi «Modifica» su un tavolo per correggere ruoli, spese all'asta o esito. Punteggi, classifica e bonus si ricalcolano da soli.</p>`+
+  S.rounds.map((r,ri)=>{
+    const open=UI.open[ri]!==undefined?UI.open[ri]:false;
+    const pend=r.tables.filter(t=>!t.done).length;
+    const cur=S.phase==="rounds"&&ri===S.rounds.length-1;
+    return `<details class="panel hist" data-ri="${ri}" ${open?"open":""}>
+      <summary><h3 style="display:inline">Turno ${r.n}</h3> <span class="badge ${pend?(cur?"":"red"):"green"}">${pend?(cur?"in corso":"in modifica"):"completo"}</span></summary>
+      <div class="tables" style="margin-top:14px">${r.tables.map(t=>vTable(t,ri)).join("")}</div></details>`;
+  }).reverse().join("");
+}
+
+/* ---------- Duelli ---------- */
+const MATCH_LABEL={QF1:"Quarto 1",QF2:"Quarto 2",QF3:"Quarto 3",QF4:"Quarto 4",SF1:"Semifinale 1",SF2:"Semifinale 2",F:"Finale 1°–2° posto",P3:"Finale 3°–4° posto"};
+const DEPENDENTS={QF1:["SF1","F","P3"],QF2:["SF1","F","P3"],QF3:["SF2","F","P3"],QF4:["SF2","F","P3"],SF1:["F","P3"],SF2:["F","P3"],F:[],P3:[]};
+function matchPlayers(id){
+  const q=S.duels.qual, R=S.duels.results;
+  const W=m=>R[m]?.winner||null;
+  const L=m=>{ if(!R[m]) return null; const [a,b]=matchPlayers(m); return R[m].winner===a?b:a; };
+  if(q.length===8){
+    const d={QF1:[q[0],q[7]],QF2:[q[3],q[4]],QF3:[q[1],q[6]],QF4:[q[2],q[5]],SF1:[W("QF1"),W("QF2")],SF2:[W("QF3"),W("QF4")]};
+    if(d[id]) return d[id];
+  } else {
+    const d={SF1:[q[0],q[3]],SF2:[q[1],q[2]]};
+    if(d[id]) return d[id];
+  }
+  if(id==="F") return [W("SF1"),W("SF2")];
+  if(id==="P3") return [L("SF1"),L("SF2")];
+  return [null,null];
+}
+function duelIds(){ return (S.duels.qual.length===8?["QF1","QF2","QF3","QF4"]:[]).concat(["SF1","SF2","F","P3"]); }
+function vMatch(id){
+  const [a,b]=matchPlayers(id), res=S.duels.results[id], lg=S.duels.legge[id];
+  const seed=pid=>pid?S.duels.qual.indexOf(pid)+1:"";
+  const ready=a&&b;
+  const skip=id==="P3"&&S.duels.thirdNotPlayed;
+  const line=pid=>`<div class="mp ${res?(res.winner===pid?"win":"lose"):""}">
+    <span class="seed">${pid?seed(pid)+"°":""}</span>
+    <span class="who">${pid?esc(nameOf(pid)):"<span class='muted'>in attesa</span>"}</span>
+    ${pid&&lg?`<span class="badge ${lg===pid?"gold":""}">${lg===pid?"Legge":"Fuorilegge"}</span>`:""}
+    ${ready&&!skip&&S.phase==="duels"?`<button class="btn small ${res?.winner===pid?"primary":"ghost"}" data-a="dwin" data-m="${id}" data-p="${pid}">Vince</button>`:""}
+  </div>`;
+  return `<div class="match ${res||skip?"done":""}">
+    <div class="row" style="margin-bottom:4px"><b>${MATCH_LABEL[id]}</b><span class="spacer"></span>${res?.forfeit?`<span class="badge">a tavolino</span>`:""}</div>
+    ${line(a)}${line(b)}
+    ${skip?`<p class="small muted" style="margin:6px 0 0">Non disputata: il 3° posto va a chi aveva più punti nella fase a punteggio.</p>`:""}
+    ${ready&&!skip&&S.phase==="duels"&&!res?`<div class="row" style="margin-top:8px">
+      ${lg?"":`<button class="btn small" data-a="dlegge" data-m="${id}">Sorteggia la Legge</button>`}
+      ${S.settings.duelMin?`<button class="btn small" data-a="clock" data-m="${id}" ${lg?"":"disabled"}>Orologio</button>`:""}
+      <button class="btn small ghost" data-a="dforfeit" data-m="${id}">Ritiro</button></div>`:""}
+  </div>`;
+}
+function vDuels(){
+  const top8=S.duels.qual.length===8;
+  const cols=[];
+  if(top8) cols.push(["Quarti di finale",["QF1","QF2","QF3","QF4"]]);
+  cols.push(["Semifinali",["SF1","SF2"]],["Finali",["F","P3"]]);
+  const finished=S.duels.results.F&&(S.duels.results.P3||S.duels.thirdNotPlayed);
+  const [c1,c2]=S.settings.duelChars.split("/");
+  return `${pendingPanel()}${driftPanel()}<section class="panel">
+    <div class="row"><h2 style="margin:0">Fase a duello</h2><span class="spacer"></span>
+      ${S.phase==="done"?`<button class="btn" data-a="reopenduels">Modifica i duelli</button>`:""}
+      ${S.phase==="duels"?`<button class="btn ghost" data-a="backtorounds">Torna alla fase a punteggio</button>`:""}
+      ${S.test&&S.phase==="duels"?`<button class="btn" data-a="simduels">Simula duelli</button>`:""}</div>
+    <p class="small muted" style="margin-top:8px">Si gioca con BANG! The Duel. L'arbitro scopre ${c2} personaggi davanti a ogni giocatore: ognuno ne tiene ${c1} in segreto, sceglie i due con cui iniziare e quale sarà attivo. ${S.settings.duelMin?`Orologio: ${S.settings.duelMin} minuti a testa, in pausa durante il rimescolamento del mazzo e alla sostituzione di un personaggio.`:"Duelli senza limite di tempo."} Se un qualificato si ritira, la vittoria va a tavolino all'avversario.</p>
+  </section>
+  <div class="bracket">${cols.map(c=>`<div class="bcol"><h3>${c[0]}</h3>${c[1].map(vMatch).join("")}</div>`).join("")}</div>
+  ${S.phase==="duels"?`<section class="panel" style="margin-top:18px"><div class="row">
+    <label class="check" style="border:0;padding:0"><input type="checkbox" data-c="third" ${S.duels.thirdNotPlayed?"checked":""}><span>La finale per il 3° posto non si disputa</span></label>
+    <span class="spacer"></span>
+    <button class="btn primary" data-a="finish" ${finished&&!pendingEdits().length&&!qualDrift()?"":"disabled"}>Concludi il torneo e vai alla classifica finale</button></div></section>`:""}`;
+}
+
+/* ---------- Dati ---------- */
+function vData(){
+  return `<section class="panel">
+    <h2>Salvataggio</h2>
+    <p>Il torneo si salva da solo in questo browser a ogni modifica. Esporta un file di backup per spostarlo su un altro computer o per sicurezza.</p>
+    <div class="row">
+      <button class="btn" data-a="export">Esporta backup (.json)</button>
+      <button class="btn" data-a="import">Importa backup</button>
+      <span class="spacer"></span>
+      <button class="btn ghost" data-a="reset">Nuovo torneo</button>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>Riepilogo regole applicate</h2>
+    <p class="small">Turni: 3 con 10–14 iscritti, 4 con 15–24, 5 con 25 o più. $ iniziali: 100 per turno. Tavoli secondo la tabella del regolamento; nessuno fa lo Sceriffo due volte e, se possibile, nessuno siede due volte in ultima posizione.</p>
+    <p class="small">Vincite: Legge 1.200 / 1.600 / 1.200 $ a Sceriffo e Vice (tavoli da 5 / 6 / 7), Rinnegato eliminato per ultimo dallo Sceriffo 300 / 350 / 400 $; Fuorilegge 1.800 / 1.500 / 1.700 $; Rinnegato 2.400 / 2.600 / 2.800 $.</p>
+    <p class="small">Bonus finale: senza duelli 25 $ per turno ai primi quattro; con duelli 200 / 100 / 50 / 25 $ per turno dal 1° al 4° posto.</p>
+  </section>`;
+}
+
+/* ===================== Stampa ===================== */
+function printSheets(){
+  const r=curRound();
+  document.getElementById("print").innerHTML=r.tables.map(t=>{
+    const k=t.seats.length;
+    return `<div class="sheet"><h4>${esc(S.name||"Torneo di BANG!")}: turno ${r.n}, tavolo ${t.n}</h4>
+      <table><thead><tr><th>#</th><th>Giocatore</th><th>Ruolo</th>${S.settings.auction?"<th>$ asta</th>":""}<th>Personaggio</th></tr></thead>
+      <tbody>${t.seats.map((pid,i)=>`<tr><td>${i+1}</td><td>${esc(nameOf(pid))}</td><td>${i===0?"Sceriffo":""}</td>${S.settings.auction?"<td></td>":""}<td></td></tr>`).join("")}</tbody></table>
+      <p>Smazzate:<span class="box"></span><span class="box"></span><span class="box"></span> Dalla 4ª smazzata scatta il Mezzogiorno di fuoco, a partire da ${esc(nameOf(t.seats[noonStarter(k)]))}.</p>
+      <p>Esito:<span class="box"></span>Legge <span class="box"></span>Fuorilegge <span class="box"></span>Rinnegato <span class="box"></span>Rinnegato eliminato per ultimo dallo Sceriffo</p></div>`;
+  }).join("");
+  window.print();
+}
+
+/* ===================== Simulazione (test) ===================== */
+function simTable(t,ri){
+  const k=t.seats.length, need=ROLE_COUNTS[k];
+  const pool=shuffle([].concat(Array(need.V).fill("V"),Array(need.R).fill("R"),Array(need.F).fill("F")));
+  t.roles={[t.seats[0]]:"S"}; t.seats.slice(1).forEach((pid,i)=>t.roles[pid]=pool[i]);
+  const x=Math.random(); t.winner=x<.42?"legge":x<.82?"fuorilegge":"rinnegato";
+  t.renLast=t.winner==="legge"&&Math.random()<.35;
+  t.spend={};
+  if(S.settings.auction) t.seats.forEach((pid,i)=>{
+    const av=Math.max(10,availableAt(pid,ri));
+    t.spend[pid]=i===t.seats.length-1?10:10*(1+Math.floor(Math.random()*Math.min(8,av/10)));
+  });
+  { const nd=Math.floor(Math.random()*4); t.decks=[0,1,2].map(i=>i<nd); }
+  t.done=true;
+}
+
+/* ===================== Azioni ===================== */
+function addNames(list){
+  const have=new Set(S.players.map(p=>p.name.toLowerCase()));
+  let dup=[];
+  list.map(s=>s.trim()).filter(Boolean).forEach(n=>{
+    if(have.has(n.toLowerCase())){dup.push(n);return;}
+    have.add(n.toLowerCase());
+    S.players.push({id:uid(),name:n,status:"active",warnings:0});
+  });
+  if(dup.length) notice("Già iscritti: "+dup.join(", "));
+}
+function findTable(id){ for(const r of S.rounds) for(const t of r.tables) if(t.id===id) return t; }
+function setStatus(id,status){
+  const p=P(id); p.status=status;
+  if(S.phase==="duels"&&S.duels.qual.includes(id)){
+    notice(p.name+" era qualificato ai duelli: usa «Ritiro» sul suo duello per assegnare la vittoria a tavolino all'avversario.");
+  }
+}
+function startTournament(){
+  const n=S.players.length;
+  S.initialCount=n;
+  S.totalTurns=S.settings.turnsOverride||turnsFor(n);
+  S.startMoney=100*S.totalTurns;
+  S.players.forEach(p=>{p.lot=Math.random(); p.status="active"; p.warnings=0;});
+  S.rounds=[buildRound(0)];
+  S.phase="rounds"; UI.tab="turno"; UI.showRank=false;
+}
+function endScoring(){
+  if(S.settings.duel){
+    const k=hasDuelTop8()?8:4;
+    S.duels={qual:ranking().slice(0,k).map(x=>x.p.id),results:{},legge:{},thirdNotPlayed:false};
+    S.phase="duels"; UI.tab="duelli";
+  } else { S.phase="done"; UI.tab="classifica"; }
+}
+function setDuelResult(m,winner,forfeit){
+  const prev=S.duels.results[m];
+  if(prev&&prev.winner!==winner) DEPENDENTS[m].forEach(d=>{delete S.duels.results[d]; delete S.duels.legge[d];});
+  S.duels.results[m]={winner,forfeit:!!forfeit};
+}
+
+async function act(a,d){
+  switch(a){
+    case "tab": UI.tab=d.v; break;
+    case "bulk": { const ta=document.getElementById("pbulk"); addNames(ta.value.split(/\r?\n|,|;/)); break; }
+    case "delp": S.players=S.players.filter(p=>p.id!==d.id); break;
+    case "loadtest":
+      if(S.players.length&&!await ask("Sostituire gli iscritti attuali con 20 partecipanti di prova?")) return;
+      S.players=[]; addNames(TEST_NAMES); S.test=true; if(!S.name) S.name="Torneo di prova"; break;
+    case "clearp": if(!await ask("Rimuovere tutti gli iscritti?")) return; S.players=[]; S.test=false; break;
+    case "start": startTournament(); break;
+    case "regen": if(!await ask("Sorteggiare di nuovo tutti i tavoli di questo turno?")) return;
+      { const i=S.rounds.length-1, r=buildRound(i); if(!r){notice("Con meno di 10 giocatori attivi non si possono formare i tavoli.");return;} S.rounds[i]=r; } break;
+    case "print": printSheets(); return;
+    case "simround": { const ri=S.rounds.length-1; curRound().tables.filter(t=>!t.done).forEach(t=>simTable(t,ri)); break; }
+    case "confirm": { const t=findTable(d.t); if(!tableErrors(t)) t.done=true; break; }
+    case "edit": findTable(d.t).done=false; break;
+    case "closeround": {
+      if(pendingEdits().length){ notice("Prima conferma i tavoli dei turni precedenti che sono in modifica."); return; }
+      if(S.rounds.length>=S.totalTurns){
+        if(!await ask("Chiudere la fase a punteggio? La classifica diventerà pubblica.")) return;
+        endScoring();
+      } else {
+        const r=buildRound(S.rounds.length);
+        if(!r){ notice("Restano meno di 10 giocatori attivi: il torneo non può proseguire."); return; }
+        S.rounds.push(r);
+      }
+      window.scrollTo(0,0); break;
+    }
+    case "noonstart": curRound().noonStart=Date.now(); break;
+    case "noonstop": curRound().noonStart=null; break;
+    case "showrank": UI.showRank=true; break;
+    case "hiderank": UI.showRank=false; break;
+    case "warn": { const p=P(d.id); p.warnings=(p.warnings||0)+1;
+      if(p.warnings>=2){ notice(p.name+" riceve la seconda ammonizione ed è espulso dal torneo."); setStatus(d.id,"expelled"); } break; }
+    case "retire": if(!await ask("Confermi il ritiro di "+nameOf(d.id)+"? Non potrà rientrare nel torneo.")) return; setStatus(d.id,"retired"); break;
+    case "expel": if(!await ask("Confermi l'espulsione di "+nameOf(d.id)+"?")) return; setStatus(d.id,"expelled"); break;
+    case "csv": exportCSV(); return;
+    case "dlegge": { const [x,y]=matchPlayers(d.m); S.duels.legge[d.m]=Math.random()<.5?x:y; break; }
+    case "dwin": setDuelResult(d.m,d.p,false); break;
+    case "dforfeit": {
+      const [x,y]=matchPlayers(d.m);
+      const who=await dialog("Chi si ritira da questo duello? La vittoria andrà a tavolino all'avversario.",[{label:"Annulla"},{label:nameOf(x)},{label:nameOf(y)}]);
+      if(!who) return;
+      const out=who===1?x:y, win=who===1?y:x;
+      if(P(out).status==="active") P(out).status="retired";
+      setDuelResult(d.m,win,true); break;
+    }
+    case "simduels": {
+      let guard=0;
+      while(guard++<10){
+        const open=duelIds().filter(m=>!S.duels.results[m]&&!(m==="P3"&&S.duels.thirdNotPlayed)&&matchPlayers(m).every(Boolean));
+        if(!open.length) break;
+        open.forEach(m=>{ const pp=matchPlayers(m); S.duels.legge[m]=S.duels.legge[m]||pp[Math.round(Math.random())]; setDuelResult(m,pp[Math.round(Math.random())],false); });
+      }
+      break;
+    }
+    case "clock": openClock(d.m); return;
+    case "finish": S.phase="done"; UI.tab="classifica"; window.scrollTo(0,0); break;
+    case "reopenduels": S.phase="duels"; UI.tab="duelli"; break;
+    case "backtorounds":
+      if(!await ask("Tornare alla fase a punteggio? Il tabellone e i risultati dei duelli verranno azzerati. I turni giocati restano.","Torna indietro")) return;
+      S.duels={qual:[],results:{},legge:{},thirdNotPlayed:false}; S.phase="rounds"; UI.tab="turno"; break;
+    case "requal":
+      if(Object.keys(S.duels.results).length&&!await ask("Aggiornare il tabellone? I risultati dei duelli già registrati verranno azzerati.","Aggiorna")) return;
+      S.duels={qual:newQual(),results:{},legge:{},thirdNotPlayed:S.duels.thirdNotPlayed};
+      if(S.phase==="done") S.phase="duels";
+      UI.tab="duelli"; break;
+    case "export": exportJSON(); return;
+    case "import": document.getElementById("importFile").click(); return;
+    case "reset": if(!await ask("Iniziare un nuovo torneo? I dati attuali verranno cancellati da questo browser (esporta prima un backup se ti servono).")) return;
+      S=fresh(); UI={tab:null,showRank:false,balance:"",editing:{},open:{}}; break;
+    /* orologio */
+    case "clk-side": clockTap(+d.s); return;
+    case "clk-pause": clockPause(); return;
+    case "clk-close": closeClock(); return;
+    case "clk-assign": { const w=CLK.over===0?CLK.b:CLK.a; setDuelResult(CLK.id,w,false); closeClock(); break; }
+    default: return;
+  }
+  render();
+}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-a]"); if(!b||b.disabled) return;
+  act(b.dataset.a,b.dataset);
+});
+document.addEventListener("toggle",e=>{ if(e.target.matches&&e.target.matches("details.hist")) UI.open[e.target.dataset.ri]=e.target.open; },true);
+document.addEventListener("submit",e=>{
+  if(e.target.dataset.f==="add"){ e.preventDefault(); const i=document.getElementById("pname"); addNames([i.value]); render(); document.getElementById("pname")?.focus(); }
+});
+document.addEventListener("change",e=>{
+  const el=e.target, c=el.dataset.c; if(!c) return;
+  const t=el.dataset.t?findTable(el.dataset.t):null;
+  switch(c){
+    case "tname": S.name=el.value; save(); return;
+    case "set": { const k=el.dataset.k; S.settings[k]=el.type==="checkbox"?el.checked:(isNaN(+el.value)?el.value:+el.value); break; }
+    case "role": t.roles[el.dataset.p]=el.value; break;
+    case "spend": t.spend[el.dataset.p]=el.value===""?"":Math.max(0,parseInt(el.value)||0); break;
+    case "winner": t.winner=el.value; if(el.value!=="legge") t.renLast=false; break;
+    case "renlast": t.renLast=el.checked; break;
+    case "deck": t.decks[+el.dataset.i]=el.checked; break;
+    case "balance": UI.balance=el.value; break;
+    case "third": S.duels.thirdNotPlayed=el.checked; if(el.checked){delete S.duels.results.P3;} break;
+    default: return;
+  }
+  render();
+});
+document.getElementById("importFile").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{ const x=JSON.parse(rd.result); if(!x||!Array.isArray(x.players)||!x.settings) throw 0; S=Object.assign(fresh(),x); UI.tab=null; render(); }
+    catch(err){ notice("Il file non è un backup valido del gestore torneo."); } };
+  rd.readAsText(f); e.target.value="";
+});
+
+/* ===================== Esportazioni ===================== */
+function download(name,text,type){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type}));
+  a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+const slug=()=>(S.name||"torneo-bang").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+function exportJSON(){ download(slug()+".json",JSON.stringify(S,null,2),"application/json"); }
+function exportCSV(){
+  const final=S.phase==="done";
+  const rows=final?finalStandings():ranking().map((x,i)=>({pos:i+1,p:x.p,s:x.s,bonus:0}));
+  const q=v=>`"${String(v).replace(/"/g,'""')}"`;
+  const head=["Posizione","Giocatore","Punteggio","Bonus","Totale","Marogi","Vittorie","Partite","Stato"];
+  const lines=[head.join(";")].concat(rows.map(r=>[r.pos,q(r.p.name),r.s.score,r.bonus,r.s.score+r.bonus,r.s.marogi.toFixed(2).replace(".",","),r.s.wins,r.s.games,r.p.status].join(";")));
+  download(slug()+"-classifica.csv","\ufeff"+lines.join("\n"),"text/csv");
+}
+
+/* ===================== Orologio per duelli ===================== */
+function fmtClock(ms){ ms=Math.max(0,ms); const s=Math.ceil(ms/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function openClock(m){
+  const [a,b]=matchPlayers(m), ms=S.settings.duelMin*60000;
+  CLK={id:m,a,b,rem:[ms,ms],act:null,paused:null,t:0,over:null};
+  renderClock(); clkTimer=setInterval(tickClock,200);
+}
+async function closeClock(){
+  if(CLK&&CLK.over===null&&CLK.act!==null&&!await ask("Chiudere l'orologio? Il tempo non verrà conservato.")) return;
+  clearInterval(clkTimer); CLK=null; document.getElementById("modal").innerHTML="";
+}
+function clockTap(side){
+  if(!CLK||CLK.over!==null) return;
+  const now=performance.now();
+  if(CLK.paused!==null){ CLK.act=CLK.paused; CLK.paused=null; CLK.t=now; }
+  else if(CLK.act===null){ CLK.act=side; CLK.t=now; }
+  else if(CLK.act===side){ CLK.rem[side]-=now-CLK.t; CLK.act=1-side; CLK.t=now; }
+  renderClock();
+}
+function clockPause(){
+  if(!CLK||CLK.over!==null) return;
+  const now=performance.now();
+  if(CLK.act!==null){ CLK.rem[CLK.act]-=now-CLK.t; CLK.paused=CLK.act; CLK.act=null; }
+  else if(CLK.paused!==null){ CLK.act=CLK.paused; CLK.paused=null; CLK.t=now; }
+  renderClock();
+}
+function tickClock(){
+  if(!CLK||CLK.act===null) return;
+  const now=performance.now();
+  const left=CLK.rem[CLK.act]-(now-CLK.t);
+  if(left<=0){ CLK.rem[CLK.act]=0; CLK.over=CLK.act; CLK.act=null; renderClock(); return; }
+  const el=document.getElementById("clk"+CLK.act); if(el) el.textContent=fmtClock(left);
+}
+function renderClock(){
+  if(!CLK) return;
+  const lg=S.duels.legge[CLK.id];
+  const side=i=>{ const pid=i?CLK.b:CLK.a; const run=CLK.act===i, out=CLK.over===i;
+    return `<button class="cside ${run?"run":""} ${out?"out":""}" data-a="clk-side" data-s="${i}">
+      <div class="n">${esc(nameOf(pid))} <span class="small">(${lg===pid?"Legge":"Fuorilegge"})</span></div>
+      <div class="t" id="clk${i}">${fmtClock(CLK.rem[i])}</div>
+      <div class="r">${out?"Tempo scaduto":run?"Tocca a fine turno":CLK.act===null&&CLK.paused===null?"Tocca se inizi tu":""}</div></button>`; };
+  const winnerName=CLK.over!==null?nameOf(CLK.over===0?CLK.b:CLK.a):"";
+  document.getElementById("modal").innerHTML=`<div class="overlay" role="dialog" aria-modal="true" aria-label="Orologio del duello"><div class="clock">
+    <div class="row"><h3>${MATCH_LABEL[CLK.id]}</h3><span class="spacer"></span><button class="btn small ghost" data-a="clk-close">Chiudi</button></div>
+    <div class="clock-sides">${side(0)}${side(1)}</div>
+    ${CLK.over!==null?`<div class="row"><p style="margin:0;flex:1"><b>Tempo scaduto: vince ${esc(winnerName)}.</b></p><button class="btn primary" data-a="clk-assign">Registra la vittoria</button></div>`
+      :`<div class="row"><p class="small muted" style="margin:0;flex:1">Metti in pausa quando si rimescola il mazzo, quando un personaggio viene eliminato o per interruzioni esterne.</p>
+        <button class="btn" data-a="clk-pause" ${CLK.act===null&&CLK.paused===null?"disabled":""}>${CLK.paused!==null?"Riprendi":"Pausa"}</button></div>`}
+  </div></div>`;
+}
+
+/* ===================== Timer del Mezzogiorno a tempo ===================== */
+setInterval(()=>{
+  const el=document.getElementById("noonClock"); const r=curRound();
+  if(!el||!r||!r.noonStart) return;
+  const left=S.settings.noonMin*60000-(Date.now()-r.noonStart);
+  el.textContent=left>0?"Mezzogiorno di fuoco tra "+fmtClock(left):"Mezzogiorno di fuoco scattato su tutti i tavoli";
+},1000);
+
+window.addEventListener("afterprint",()=>{document.getElementById("print").innerHTML="";});
+render();
+</script>
+</body>
+</html>
